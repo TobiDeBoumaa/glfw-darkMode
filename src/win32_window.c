@@ -1146,11 +1146,6 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
             break;
         }
 
-        case WM_ERASEBKGND:
-        {
-            return TRUE;
-        }
-
         case WM_NCACTIVATE:
         case WM_NCPAINT:
         {
@@ -1289,6 +1284,15 @@ static int createNativeWindow(_GLFWwindow* window,
         wc.lpfnWndProc   = windowProc;
         wc.hInstance     = _glfw.win32.instance;
         wc.hCursor       = LoadCursorW(NULL, IDC_ARROW);
+        DWORD useLightTheme;
+        DWORD dataSize = sizeof(useLightTheme);
+        if (ERROR_SUCCESS != RegGetValueA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "AppsUseLightTheme", RRF_RT_DWORD, NULL, &useLightTheme, &dataSize)) {
+            printf("Could not determin if dark mode is set in windows settings, assuming light mode.\n");
+        }
+        if(useLightTheme)
+            wc.hbrBackground = CreateSolidBrush(RGB(240, 240, 240));
+        else
+            wc.hbrBackground = CreateSolidBrush(RGB(15, 15, 15));
 #if defined(_GLFW_WNDCLASSNAME)
         wc.lpszClassName = _GLFW_WNDCLASSNAME;
 #else
